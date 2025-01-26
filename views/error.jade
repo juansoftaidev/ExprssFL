@@ -1,6 +1,11 @@
 extends layout
 
 block content
-  h1= message
-  h2= error.status
-  pre #{error.stack}
+  h1 Error: #{message}
+  h2 Status Code: #{error.status}
+  if error.stack
+    pre #{error.stack}
+  else
+    p No additional error information available.
+  p
+    a(href='/') Go back to the home page
