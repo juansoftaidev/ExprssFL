@@ -38,12 +38,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install NodeJSScan from npm
+        run: |
+          npm install -g nodejsscan
+
       - name: Run NodeJSScan
         run: |
-          git clone https://github.com/ajinabraham/nodejsscan.git
-          cd nodejsscan
-          npm install
-          npm run scan -- ../your-nodejs-app-directory
+          nodejsscan .  # Scan the current repository
 
   trivy-scan:
     runs-on: ubuntu-latest
