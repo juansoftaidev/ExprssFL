@@ -1,54 +1,35 @@
-var express = require('express');
-var router = express.Router();
+// index.js
 
-router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+import express from 'express';
+import dotenv from 'dotenv';
+import apiRoutes from './routes/api.js';
+import { createClient } from 'redis';
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Middleware
+app.use(express.json()); // Parse JSON bodies
+
+// Create a Redis client
+const client = createClient({
+  url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`
 });
 
-router.get('/about', function (req, res, next) {
-  res.render('about', { title: 'About Us' });
+// Handle Redis connection errors
+client.on('error', (err) => {
+  console.error('Redis error:', err);
 });
 
-router.get('/data', async function (req, res, next) {
-  try {
-    const data = await fetchDataFromDatabase();
-    res.json(data);
-  } catch (error) {
-    next(error);
-  }
+// Connect to the Redis server
+await client.connect();
+
+// Routes
+app.use('/api', apiRoutes);
+
+// Start the server
+app.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
-
-// User-related routes
-router.get('/users', function (req, res, next) {
-  const users = getUsers(); // Replace with actual user fetching logic
-  res.json(users);
-});
-
-router.post('/users', function (req, res, next) {
-  const newUser = req.body; // Assume body-parser middleware is used
-  addUser(newUser); // Replace with actual user adding logic
-  res.status(201).json(newUser);
-});
-
-// Placeholder function for fetching data
-async function fetchDataFromDatabase() {
-  return [
-    { id: 1, name: 'Item 1' },
-    { id: 2, name: 'Item 2' },
-  ];
-}
-
-// Placeholder functions for user operations
-function getUsers() {
-  return [
-    { id: 1, name: 'John Doe' },
-    { id: 2, name: 'Jane Doe' },
-  ];
-}
-
-function addUser(user) {
-  // Logic to add user to the database
-  console.log('User  added:', user);
-}
-
-module.exports = router;
