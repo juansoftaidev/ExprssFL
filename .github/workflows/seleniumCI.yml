@@ -1,0 +1,60 @@
+name: NodeEXP -CI/SecOps
+
+on:
+  push:
+    branches:
+      - master
+      - 'feature/*'
+      - 'bugfix/*'
+  pull_request:
+    branches:
+      - master
+      - 'feature/*'
+      - 'bugfix/*'
+
+jobs:
+  snyk-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/nodejs@v2
+        with:
+          args: test
+
+  nodejsscan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install NodeJSScan from npm
+        run: |
+          npm install -g nodejsscan
+
+      - name: Run NodeJSScan
+        run: |
+          nodejsscan .  # Scan the current repository
+
+  trivy-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get install -y trivy
+
+      - name: Run Trivy scan
+        run: trivy fs --exit-code 1 --severity HIGH,CRITICAL your-nodejs-app-directory
